@@ -8,7 +8,7 @@ function onDragOver(event) {
   event.preventDefault();
 }
 
-function onDrop(event) {
+async function onDrop(event) {
   const id = event.dataTransfer.getData('text');
 
   const draggableElement = document.getElementById(id);
@@ -18,8 +18,6 @@ function onDrop(event) {
   if (dropzone.classList.contains('taskColumn')) {
     dropzone.appendChild(draggableElement);
 
-    let tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : [];
-
     tasks.forEach(task => {
       if (task.id === id) {
         task.status = dropzone.id;
@@ -27,10 +25,9 @@ function onDrop(event) {
       }
     });
 
-    localStorage.setItem('tasks', JSON.stringify(tasks));
-
     event
       .dataTransfer
       .clearData();
   }
 }
+

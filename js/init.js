@@ -24,6 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
         taskModal.saveTask();
         document.querySelector('#modal-container .modal').classList.remove('is-active');
     });
+    document.getElementById("deleteButton").addEventListener('click', () => {
+        taskModal.deleteTask();
+        document.querySelector('#modal-container .modal').classList.remove('is-active');
+    });
     document.getElementById("cancelButton").addEventListener('click', () => {
         taskModal.cancelTask();
         document.querySelector('#modal-container .modal').classList.remove('is-active');
@@ -34,13 +38,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function initilizeTasks() {
-    let tasks = localStorage.getItem('tasks') ? JSON.parse(localStorage.getItem('tasks')) : [];
-
     fetch('http://localhost:3000/api/tasks')
         .then(response => response.json())
         .then(data => {
-            // Combina las tareas del backend con las del localStorage
-            const finales = [...tasks, ...data];
+            tasks = data;
 
             // Elementos del DOM
             let backLog = document.getElementById('backlog');
@@ -50,7 +51,7 @@ function initilizeTasks() {
             let done = document.getElementById('done');
 
             // Renderiza las tareas en función de su estado
-            finales.forEach(task => {
+            data.forEach(task => {
                 const taskObj = new Task(task.title, task.description, task.assignedTo, task.priority, task.status, task.createdAt, task.dueDate, task.id);
                 switch (taskObj.status) {
                     case 'backlog':

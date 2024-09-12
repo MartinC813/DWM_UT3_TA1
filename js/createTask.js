@@ -81,7 +81,10 @@ class CreateTask {
                     <footer class="modal-card-foot">
                         <div class="control" id="saveButton">
                                 <button class="button is-primary" disabled>Crear tarea</button>
-                            </div>
+                        </div>
+                        <div class="control" id="deleteButton">
+                            <button class="button is-danger" style="display: none;">Eliminar tarea</button>
+                        </div>
                     </footer>
                 </div>
             </div>
@@ -92,6 +95,7 @@ class CreateTask {
         document.querySelector('.modal-card-title').textContent = 'Creación de tarea';
         document.querySelector('#saveButton button').textContent = 'Crear tarea';
         document.querySelector('#modal-container .modal').classList.add('is-active');
+        document.querySelector('#deleteButton button').style.display = 'none';
     }
 
     validateTask() {
@@ -121,16 +125,38 @@ class CreateTask {
         document.querySelector('#saveButton button').disabled = !isValid;
         return isValid;
     }
+
+    async deleteTask() {
+        try {
+            const response = await fetch("http://localhost:3000/api/tasks/" + this.task.id, {
+                method: 'DELETE'
+            });
+            if (!response.ok) {
+                console.error('Error al eliminar la tarea');
+                return null;
+            }
+            document.getElementById(this.task.id).remove();
+
+            // Actualizar el array de tareas
+            tasks = tasks.filter(t => t.id !== this.task.id);
+        } catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+    
     loadTask(task) {
-        const currentTask = JSON.parse(localStorage.getItem('tasks')).find(t => t.id === task.id);
+        const currentTask = tasks.find(t => t.id === task.id);
         this.editing = true;
         this.task = task;
+        
         document.querySelector('#taskTitle').value = currentTask.title;
         document.querySelector('#taskDesc').value = currentTask.description;
         document.querySelector('#taskAssigned').value = currentTask.assignedTo;
         document.querySelector('#taskPriority').value = currentTask.priority;
         document.querySelector('#taskStatus').value = currentTask.status;
         document.querySelector('#taskDueDate').value = currentTask.dueDate;
+        document.querySelector('#deleteButton button').style.display = 'block';
         document.querySelector('.modal-card-title').textContent = 'Editar tarea';
         document.querySelector('#saveButton button').textContent = 'Guardar cambios';
         document.querySelector('#saveButton button').disabled = false;
@@ -139,6 +165,13 @@ class CreateTask {
 
     async saveTask() {
         if (!this.validateTask()) return;
+    
+        if (this.editing) {
+            // Elimina el elemento del DOM y actualiza el array de tareas
+            document.getElementById(this.task.id).remove();
+            tasks = tasks.filter(t => t.id !== this.task.id); // Filtra la tarea vieja fuera del array
+            this.editing = false;
+        }
     
         const title = document.querySelector('#taskTitle').value;
         const description = document.querySelector('#taskDesc').value;
@@ -176,15 +209,17 @@ class CreateTask {
             }
     
             const createdTask = await response.json();
-            this.renderTask(createdTask); // Renderiza la tarea devuelta por el backend
     
-            // Limpia los campos después de guardar la tarea
+            tasks.push(createdTask);
+    
+            this.renderTask(createdTask);
+    
             this.cancelTask();
         } catch (error) {
             console.error('Error:', error);
         }
     }
-    
+
     renderTask(task) {
         let container;
         const taskObj = new Task(task.title, task.description, task.assigned, task.priority, task.status, new Date(), task.dueDate, task.id);
