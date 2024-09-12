@@ -90,7 +90,7 @@ class CreateTask {
             </div>
         `;
     }
-    
+
     openModal() {
         document.querySelector('.modal-card-title').textContent = 'Creación de tarea';
         document.querySelector('#saveButton button').textContent = 'Crear tarea';
@@ -101,9 +101,9 @@ class CreateTask {
     validateTask() {
         const title = document.querySelector('#taskTitle').value.trim();
         const description = document.querySelector('#taskDesc').value.trim();
-        
+
         let isValid = true;
-        
+
         if (title === '') {
             document.getElementById('titleError').style.display = 'block';
             document.querySelector('#taskTitle').classList.add('is-danger');
@@ -112,7 +112,7 @@ class CreateTask {
             document.getElementById('titleError').style.display = 'none';
             document.querySelector('#taskTitle').classList.remove('is-danger');
         }
-        
+
         if (description === '') {
             document.getElementById('descriptionError').style.display = 'block';
             document.querySelector('#taskDesc').classList.add('is-danger');
@@ -121,7 +121,7 @@ class CreateTask {
             document.getElementById('descriptionError').style.display = 'none';
             document.querySelector('#taskDesc').classList.remove('is-danger');
         }
-        
+
         document.querySelector('#saveButton button').disabled = !isValid;
         return isValid;
     }
@@ -137,19 +137,18 @@ class CreateTask {
             }
             document.getElementById(this.task.id).remove();
 
-            // Actualizar el array de tareas
             tasks = tasks.filter(t => t.id !== this.task.id);
         } catch (error) {
             console.error(error);
             return null;
         }
     }
-    
+
     loadTask(task) {
         const currentTask = tasks.find(t => t.id === task.id);
         this.editing = true;
         this.task = task;
-        
+
         document.querySelector('#taskTitle').value = currentTask.title;
         document.querySelector('#taskDesc').value = currentTask.description;
         document.querySelector('#taskAssigned').value = currentTask.assignedTo;
@@ -165,27 +164,27 @@ class CreateTask {
 
     async saveTask() {
         if (!this.validateTask()) return;
-    
+
         if (this.editing) {
             // Elimina el elemento del DOM y actualiza el array de tareas
             document.getElementById(this.task.id).remove();
-            tasks = tasks.filter(t => t.id !== this.task.id); // Filtra la tarea vieja fuera del array
+            tasks = tasks.filter(t => t.id !== this.task.id); // Elimina la tarea vieja fuera del array
             this.editing = false;
         }
-    
+
         const title = document.querySelector('#taskTitle').value;
         const description = document.querySelector('#taskDesc').value;
         const assigned = document.querySelector('#taskAssigned').value;
         const priority = document.querySelector('#taskPriority').value;
         const status = document.querySelector('#taskStatus').value;
         let dueDate = document.querySelector('#taskDueDate').value;
-    
+
         if (!dueDate) {
             const today = new Date();
             today.setDate(today.getDate() + 7);
             dueDate = today.toISOString().slice(0, 10);
         }
-    
+
         const taskData = {
             title,
             description,
@@ -194,7 +193,7 @@ class CreateTask {
             status,
             dueDate
         };
-    
+
         try {
             const response = await fetch('http://localhost:3000/api/tasks', {
                 method: 'POST',
@@ -203,18 +202,18 @@ class CreateTask {
                 },
                 body: JSON.stringify(taskData),
             });
-    
+
             if (!response.ok) {
                 throw new Error('Error al crear la tarea.');
             }
-    
+
             const createdTask = await response.json();
-    
+
             tasks.push(createdTask);
-    
+
             this.renderTask(createdTask);
-    
             this.cancelTask();
+
         } catch (error) {
             console.error('Error:', error);
         }
@@ -223,7 +222,7 @@ class CreateTask {
     renderTask(task) {
         let container;
         const taskObj = new Task(task.title, task.description, task.assigned, task.priority, task.status, new Date(), task.dueDate, task.id);
-    
+
         switch (taskObj.status) {
             case 'backlog':
                 container = document.getElementById('backlog');
@@ -243,8 +242,8 @@ class CreateTask {
             default:
                 return;
         }
-    
-        container.innerHTML += taskObj.toHTML(); 
+
+        container.innerHTML += taskObj.toHTML();
     }
     cancelTask() {
         document.querySelector('#taskTitle').value = '';

@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById("newTask").addEventListener('click', () => {
         taskModal.openModal();
     });
+    
     document.getElementById("newTaskMini").addEventListener('click', () => {
         taskModal.openModal();
     });
@@ -24,14 +25,17 @@ document.addEventListener('DOMContentLoaded', () => {
         taskModal.saveTask();
         document.querySelector('#modal-container .modal').classList.remove('is-active');
     });
+
     document.getElementById("deleteButton").addEventListener('click', () => {
         taskModal.deleteTask();
         document.querySelector('#modal-container .modal').classList.remove('is-active');
     });
+
     document.getElementById("cancelButton").addEventListener('click', () => {
         taskModal.cancelTask();
         document.querySelector('#modal-container .modal').classList.remove('is-active');
     });
+
     document.querySelector('#taskTitle').addEventListener('input', () => taskModal.validateTask());
     document.querySelector('#taskDesc').addEventListener('input', () => taskModal.validateTask());
 });
@@ -43,14 +47,13 @@ function initilizeTasks() {
         .then(data => {
             tasks = data;
 
-            // Elementos del DOM
+            // Containers
             let backLog = document.getElementById('backlog');
             let toDo = document.getElementById('toDo');
             let inProgress = document.getElementById('inProgress');
             let blocked = document.getElementById('blocked');
             let done = document.getElementById('done');
 
-            // Renderiza las tareas en función de su estado
             data.forEach(task => {
                 const taskObj = new Task(task.title, task.description, task.assignedTo, task.priority, task.status, task.createdAt, task.dueDate, task.id);
                 switch (taskObj.status) {
